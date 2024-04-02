@@ -1,1 +1,59 @@
-print(1234)
+import pygame
+pygame.init()
+
+# Set up the drawing window
+screen = pygame.display.set_mode([500, 500])
+pygame.display.set_caption('My great game !!!')
+
+background_image = pygame.image.load("background_game.png").convert()
+background_image = pygame.transform.scale(background_image, (500, 500))
+player = pygame.image.load('ship2.jpg')
+
+# Set initial position and dimensions
+x = 200
+y = 200
+width = 20
+height = 20
+vel = 1  # Increased velocity for faster movement
+
+# Run until the user asks to quit
+running = True
+while running:
+    # stores keys pressed
+    keys = pygame.key.get_pressed()
+
+    # if left arrow key is pressed
+    if keys[pygame.K_LEFT] and x > 0:
+        # decrement in x co-ordinate
+        x -= vel
+
+    # if right arrow key is pressed
+    if keys[pygame.K_RIGHT] and x < 500 - width:
+        # increment in x co-ordinate
+        x += vel
+
+    # if up arrow key is pressed
+    if keys[pygame.K_UP] and y > 0:
+        # decrement in y co-ordinate
+        y -= vel
+
+    # if down arrow key is pressed
+    if keys[pygame.K_DOWN] and y < 500 - height:
+        # increment in y co-ordinate
+        y += vel
+
+    # Did the user click the window close button?
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Blit the background image to the screen
+    screen.blit(background_image, (0, 0))
+
+    # Draw a solid blue square
+    pygame.draw.rect(screen, (0, 0, 255), (x, y, width, height))
+
+    # Blit the player image onto the screen at the current x, y position
+    screen.blit(player, (x, y))
+
+    pygame.display.flip()

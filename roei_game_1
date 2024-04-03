@@ -1,4 +1,6 @@
 import pygame
+import random
+
 pygame.init()
 
 # Set up the drawing window
@@ -8,52 +10,60 @@ pygame.display.set_caption('My great game !!!')
 background_image = pygame.image.load("background_game.png").convert()
 background_image = pygame.transform.scale(background_image, (500, 500))
 player = pygame.image.load('ship2.jpg')
+enemy_image = pygame.image.load('enemy.png')
 
-# Set initial position and dimensions
-x = 200
-y = 200
-width = 20
-height = 20
-vel = 1  # Increased velocity for faster movement
+# Set initial position and dimensions of the player
+player_width = 50
+player_height = 51
+player_vel = 0.5  # Increased velocity for faster movement
+player_x = (500 - player_width) / 2
+player_y = 500 - player_height
+
+# Create a list to store enemy positions
+enemies = []
+
+# Variable to control enemy generation
+create_enemy = True
 
 # Run until the user asks to quit
 running = True
 while running:
-    # stores keys pressed
-    keys = pygame.key.get_pressed()
-
-    # if left arrow key is pressed
-    if keys[pygame.K_LEFT] and x > 0:
-        # decrement in x co-ordinate
-        x -= vel
-
-    # if right arrow key is pressed
-    if keys[pygame.K_RIGHT] and x < 500 - width:
-        # increment in x co-ordinate
-        x += vel
-
-    # if up arrow key is pressed
-    if keys[pygame.K_UP] and y > 0:
-        # decrement in y co-ordinate
-        y -= vel
-
-    # if down arrow key is pressed
-    if keys[pygame.K_DOWN] and y < 500 - height:
-        # increment in y co-ordinate
-        y += vel
-
-    # Did the user click the window close button?
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+    # Generate new enemy
+    if create_enemy:
+        enemy_width = 50
+        enemy_height = 51
+        enemy_x = random.randint(0, 500 - enemy_width)
+        enemy_y = 0 - enemy_height
+        enemies.append([enemy_x, enemy_y])
+        create_enemy = False
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and player_x > 0:
+        player_x -= player_vel
+    
+    if keys[pygame.K_RIGHT] and player_x < 500 - player_width - player_vel:
+        player_x += player_vel
+
+    # Move enemies upward
+    for enemy in enemies:
+        enemy[1] += 0.3  # Adjust this value to control enemy speed
+
     # Blit the background image to the screen
     screen.blit(background_image, (0, 0))
 
-    # Draw a solid blue square
-    pygame.draw.rect(screen, (0, 0, 255), (x, y, width, height))
+    # Draw the player
+    pygame.draw.rect(screen, (0, 0, 255), (player_x, player_y, player_width, player_height))
+    screen.blit(player, (player_x, player_y))
 
-    # Blit the player image onto the screen at the current x, y position
-    screen.blit(player, (x, y))
+    # Draw enemies
+    for enemy in enemies:
+        enemy_x, enemy_y = enemy
+        screen.blit(enemy_image, (enemy_x, enemy_y))
 
     pygame.display.flip()
+
+pygame.quit()

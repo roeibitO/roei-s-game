@@ -1,5 +1,6 @@
 import pygame
 import random
+import sys
 
 def main():
     """ראשי הפונקציה להפעלת המשחק."""
@@ -19,7 +20,7 @@ def main():
     # הגדרת מיקום וממדי השחקן
     player_width = 50
     player_height = 51
-    player_vel = 0.5  # מהירות גבוהה יותר לתנועה
+    player_vel = 4  # מהירות גבוהה יותר לתנועה
     player_x = (500 - player_width) / 2
     player_y = 500 - player_height
 
@@ -31,17 +32,16 @@ def main():
         enemy_width = 50
         enemy_height = 51
         enemy_x = random.randint(0, 500 - enemy_width)
-        enemy_y = 0 - enemy_height
+        enemy_y = random.randint(-500, -enemy_height)  # יצירת אויב באקראי בחלק העליון של המסך
         enemies.append([enemy_x, enemy_y])
 
     # פונקציה להזזת האויבים למעלה
     def move_enemies():
         for enemy in enemies:
-            enemy[1] += 0.3  # שינוי מיקום אנכי - ניתן לשנות את הערך כדי לשנות את המהירות
+            enemy[1] += 3  # שינוי מיקום אנכי - ניתן לשנות את הערך כדי לשנות את המהירות
 
     # פונקציה לציור השחקן
     def draw_player():
-        pygame.draw.rect(screen, (0, 0, 255), (player_x, player_y, player_width, player_height))
         screen.blit(player, (player_x, player_y))
 
     # פונקציה לציור האויבים
@@ -50,15 +50,12 @@ def main():
             enemy_x, enemy_y = enemy
             screen.blit(enemy_image, (enemy_x, enemy_y))
 
-    # פונקציה ליצירת שני אויבים חדשים כאשר שני האויבים יוצאים מהמסך
-    def create_new_enemies():
-        if all(enemy[1] > 500 for enemy in enemies):
-            for _ in range(2):  # יצירת שני אויבים חדשים
-                generate_enemy()
+    clock = pygame.time.Clock()
 
-    # ריצה עד שהמשתמש יבקש לסיים
+    # Run until the user asks to quit
     running = True
     while running:
+        screen.fill((0, 0, 0))  # מילוי צבע שחור למחיקת המסך
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -66,14 +63,33 @@ def main():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player_x > 0:
             player_x -= player_vel
-        
+
         if keys[pygame.K_RIGHT] and player_x < 500 - player_width - player_vel:
             player_x += player_vel
 
         move_enemies()
 
         # יצירת אויבים חדשים
-        create_new_enemies()
+        if len(enemies) < 2:
+            generate_enemy()
+
+        # Move enemies upward
+        for enemy in enemies:
+            enemy[1] += 3  # Adjust this value to control enemy speed
+
+        # יצירת אויבים חדשים כאשר שני האויבים האחרונים יוצאים מהתמונה
+        if len(enemies) >= 2 and all(enemy[1] > 500 for enemy in enemies[-2:]):
+            generate_enemy()
+            generate_enemy()
+
+        # בדיקת פגיעת השחקן באויב
+        for enemy in enemies:
+            if (enemy[0] <= player_x <= enemy[0] + player_width or
+                    enemy[0] <= player_x + player_width <= enemy[0] + player_width) and \
+                    (enemy[1] <= player_y <= enemy[1] + player_height or
+                     enemy[1] <= player_y + player_height <= enemy[1] + player_height):
+                pygame.quit()
+                sys.exit()
 
         # הצגת תמונת הרקע
         screen.blit(background_image, (0, 0))
@@ -85,6 +101,7 @@ def main():
         draw_enemies()
 
         pygame.display.flip()
+        clock.tick(60)  # קביעת מהירות הפריים
 
     pygame.quit()
 

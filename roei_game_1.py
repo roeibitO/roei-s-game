@@ -13,19 +13,37 @@ def main():
     # טעינת תמונת הרקע
     background_image = pygame.image.load("background_game.png").convert()
     background_image = pygame.transform.scale(background_image, (500, 500))
+    # טעינת תמונת המסך "Game Over"
+    game_over_image = pygame.image.load('gameover.jpg')
+
+
+
+    
+    screen_gameover = pygame.display.set_mode([500, 500])
+    pygame.display.set_caption('המשחק הכי טוב שלי!!!')
+
+    # טעינת תמונת סוף המשחק
+    game_over_image = pygame.image.load("gameover.jpg").convert()
+    game_over_image = pygame.transform.scale(game_over_image, (500, 500))
     # טעינת תמונת השחקן והאויב
     player = pygame.image.load('ship2.jpg')
     enemy_image = pygame.image.load('enemy.png')
+    # טעינת תמונת היריות
+    bullet_image = pygame.image.load('truebullet.png')
+
 
     # הגדרת מיקום וממדי השחקן
     player_width = 50
     player_height = 51
-    player_vel = 4  # מהירות גבוהה יותר לתנועה
+    player_vel = 8  # מהירות גבוהה יותר לתנועה
     player_x = (500 - player_width) / 2
     player_y = 500 - player_height
 
-    # רשימה לאותיות של אויבים
+    # רשימה של אויבים
     enemies = []
+
+    # רשימה של יריות
+    bullets = []
 
     # פונקציה ליצירת אויב חדש
     def generate_enemy():
@@ -35,10 +53,21 @@ def main():
         enemy_y = random.randint(-500, -enemy_height)  # יצירת אויב באקראי בחלק העליון של המסך
         enemies.append([enemy_x, enemy_y])
 
+    # פונקציה ליצירת יריות
+    def fire_bullet():
+        bullet_x = player_x + player_width / 2
+        bullet_y = player_y
+        bullets.append([bullet_x, bullet_y])
+
     # פונקציה להזזת האויבים למעלה
     def move_enemies():
         for enemy in enemies:
-            enemy[1] += 3  # שינוי מיקום אנכי - ניתן לשנות את הערך כדי לשנות את המהירות
+            enemy[1] += 3.5  # שינוי מיקום אנכי - ניתן לשנות את הערך כדי לשנות את המהירות
+
+    # פונקציה להזזת היריות למעלה
+    def move_bullets():
+        for bullet in bullets:
+            bullet[1] -= 5  # שינוי מיקום אנכי של היריה - ניתן לשנות את המהירות
 
     # פונקציה לציור השחקן
     def draw_player():
@@ -50,6 +79,12 @@ def main():
             enemy_x, enemy_y = enemy
             screen.blit(enemy_image, (enemy_x, enemy_y))
 
+    # פונקציה לציור היריות
+    def draw_bullets():
+        for bullet in bullets:
+            bullet_x, bullet_y = bullet
+            screen.blit(bullet_image, (bullet_x, bullet_y))
+
     clock = pygame.time.Clock()
 
     # Run until the user asks to quit
@@ -59,6 +94,9 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    fire_bullet()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player_x > 0:
@@ -68,6 +106,7 @@ def main():
             player_x += player_vel
 
         move_enemies()
+        move_bullets()
 
         # יצירת אויבים חדשים
         if len(enemies) < 2:
@@ -88,8 +127,7 @@ def main():
                     enemy[0] <= player_x + player_width <= enemy[0] + player_width) and \
                     (enemy[1] <= player_y <= enemy[1] + player_height or
                      enemy[1] <= player_y + player_height <= enemy[1] + player_height):
-                pygame.quit()
-                sys.exit()
+                running = False
 
         # הצגת תמונת הרקע
         screen.blit(background_image, (0, 0))
@@ -100,8 +138,18 @@ def main():
         # ציור האויבים
         draw_enemies()
 
+        # ציור היריות
+        draw_bullets()
+
         pygame.display.flip()
         clock.tick(60)  # קביעת מהירות הפריים
+
+    # מציג את מסך ה-"Game Over"
+    screen_gameover.blit(game_over_image, (0, 0))
+    pygame.display.flip()
+
+    # ממתין לשנייה לפני סגירת החלון
+    pygame.time.wait(1000)
 
     pygame.quit()
 

@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+from pygame import mixer
 
 def main():
     """ראשי הפונקציה להפעלת המשחק."""
@@ -27,9 +28,14 @@ def main():
     game_over_image = pygame.transform.scale(game_over_image, (500, 500))
     # טעינת תמונת השחקן והאויב
     player = pygame.image.load('ship2.jpg')
-    enemy_image = pygame.image.load('enemy.png')
+    enemy_image = pygame.image.load('moonenemy.png')
     # טעינת תמונת היריות
     bullet_image = pygame.image.load('truebullet.png')
+
+    mixer.music.load("sound.mp3")
+    mixer.music.play(-1)
+
+    shotsound = pygame.mixer.Sound("bulletssaund1.wav")
 
 
     # הגדרת מיקום וממדי השחקן
@@ -97,6 +103,8 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     fire_bullet()
+                    shotsound.play()
+
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player_x > 0:
@@ -149,7 +157,7 @@ def main():
     pygame.display.flip()
 
     # ממתין לשנייה לפני סגירת החלון
-    pygame.time.wait(1000)
+    pygame.time.wait(2000)
 
     pygame.quit()
 

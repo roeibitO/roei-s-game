@@ -14,18 +14,11 @@ def main():
     # טעינת תמונת הרקע
     background_image = pygame.image.load("background_game.png").convert()
     background_image = pygame.transform.scale(background_image, (500, 500))
-    # טעינת תמונת המסך "Game Over"
-    game_over_image = pygame.image.load('gameover.jpg')
-
-
-
     
-    screen_gameover = pygame.display.set_mode([500, 500])
-    pygame.display.set_caption('המשחק הכי טוב שלי!!!')
-
     # טעינת תמונת סוף המשחק
     game_over_image = pygame.image.load("gameover.jpg").convert()
     game_over_image = pygame.transform.scale(game_over_image, (500, 500))
+    
     # טעינת תמונת השחקן והאויב
     player = pygame.image.load('ship2.jpg')
     enemy_image = pygame.image.load('moonenemy.png')
@@ -36,7 +29,7 @@ def main():
     mixer.music.play(-1)
 
     shotsound = pygame.mixer.Sound("bulletssaund1.wav")
-
+    kchow = pygame.mixer.Sound("kchow!.mp3")
 
     # הגדרת מיקום וממדי השחקן
     player_width = 50
@@ -105,7 +98,6 @@ def main():
                     fire_bullet()
                     shotsound.play()
 
-
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player_x > 0:
             player_x -= player_vel
@@ -137,6 +129,20 @@ def main():
                      enemy[1] <= player_y + player_height <= enemy[1] + player_height):
                 running = False
 
+        # בדיקת פגיעת יריות באויבים
+        for bullet in bullets[:]:
+            bullet_x, bullet_y = bullet
+            for enemy in enemies[:]:
+                enemy_x, enemy_y = enemy
+                if (enemy_x <= bullet_x <= enemy_x + player_width or
+                        enemy_x <= bullet_x + player_width <= enemy_x + player_width) and \
+                        (enemy_y <= bullet_y <= enemy_y + player_height or
+                         enemy_y <= bullet_y + player_height <= enemy_y + player_height):
+                    bullets.remove(bullet)
+                    kchow.play()
+                    enemies.remove(enemy)
+                    break
+
         # הצגת תמונת הרקע
         screen.blit(background_image, (0, 0))
 
@@ -153,7 +159,7 @@ def main():
         clock.tick(60)  # קביעת מהירות הפריים
 
     # מציג את מסך ה-"Game Over"
-    screen_gameover.blit(game_over_image, (0, 0))
+    screen.blit(game_over_image, (0, 0))
     pygame.display.flip()
 
     # ממתין לשנייה לפני סגירת החלון
